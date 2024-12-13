@@ -6,9 +6,10 @@ const {EnterBook,GetBooks,RemoveBook,UpdateBook}=require('../controller/Book.con
 // const defineRole=require('../middleware/role/defineRole');
 // const verifyRole=require('../middleware/role/verifyRole')
 const upload=require('../middleware/ImageUpload/imageUploadMiddleware');
+const {verify}=require('../middleware/verifyToken')
  
 router.post(
-    '/Enter',
+    '/Enter',verify(['ADMIN']),
     upload.fields([
         { name: 'authorImage', maxCount: 1 },
         { name: 'BookCover', maxCount: 1 }
@@ -17,8 +18,8 @@ router.post(
 
 router.get('/Get',GetBooks);
 
-router.put('/Update',upload.single('BookCover'),UpdateBook);
+router.put('/Update',verify(['ADMIN']),upload.single('BookCover'),UpdateBook);
 
-router.delete('/Delete',RemoveBook);
+router.delete('/Delete',verify(['ADMIN']),RemoveBook);
 
 module.exports=router
