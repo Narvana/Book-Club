@@ -8,7 +8,7 @@ const BookSchema=new mongoose.Schema({
     },
     authorID:{
         type: mongoose.Schema.Types.ObjectID,
-        ref:'authors',
+        ref:'Author',
         required:[true,'Author Data is required']
     },
     publication: {
@@ -31,34 +31,7 @@ const BookSchema=new mongoose.Schema({
     BookCover:{
         type:String,
         required:[true,'Book Cover Image is required']
-    }, 
-    BookVote: {
-        type: [String]
-        // validate: [
-        //     {
-        //         validator: function (emails) {
-        //             // Check if array contains only one email
-        //             return emails.length === 1;
-        //         },
-        //         message: 'BookVote can only contain one email at a time.',
-        //     },
-        //     {
-        //         validator: function (emails) {
-        //             // Check if all emails are unique
-        //             return new Set(emails).size === emails.length;
-        //         },
-        //         message: 'BookVote must contain unique email addresses.',
-        //     },
-        //     {
-        //         validator: function (emails) {
-        //             // Check if the email is valid
-        //             return emails.every(email => validator.isEmail(email));
-        //         },
-        //         message: 'BookVote accepts only valid email addresses.',
-        //     },
-        // ],
-    },
-    
+    }    
 })
 
 const Book = mongoose.model('Book',BookSchema);
