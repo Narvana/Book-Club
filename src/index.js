@@ -5,6 +5,10 @@ const express = require('express')
 const app=express()
 const helmet = require('helmet')
 const cors=require('cors')
+const csurf = require('csurf');
+const csrfProtection = csurf({ cookie: true });
+
+
 
 const cookieParser=require('cookie-parser')
 
@@ -19,9 +23,15 @@ const multer=require('multer');
 const port = process.env.PORT || 1000;
 
 app.use(helmet());
-
+app.use(csrfProtection);
 app.use(cors({
-    origin: ["http://localhost:3000","http://localhost:5173","https://bookclubadmin.netlify.app"],
+    origin: 
+    [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "https://bookclubadmin.netlify.app",
+        "https://bookclubadmin.vercel.app"
+    ],
     methods:["GET","POST","PUT","DELETE"],
     credentials:true,
     allowedHeaders: ['Content-Type', 'Authorization'],
