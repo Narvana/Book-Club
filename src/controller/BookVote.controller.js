@@ -44,14 +44,15 @@ const CreateAdminBookVote=async(req,res,next)=>{
             {
                 return next(ApiErrors(400,`Book with id -: ${id} not found `));
             }
-
-
             const CheckBookVote= await BookVote.find({
                 'BookID':id,
                 "VoteData.VoteMonth": VoteData.VoteMonth,
                 "VoteData.VoteYear": VoteData.VoteYear
             })
-            if(CheckBookVote)
+
+            // return console.log(CheckBookVote[0].BookID.equals(id));
+        
+            if(CheckBookVote.length > 0 && CheckBookVote[0].BookID.equals(id))
             {
                 return next(ApiErrors(400,`Book Vote with Book ID -: ${id}  already exist.`));
             }
