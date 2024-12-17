@@ -22,8 +22,8 @@ router.put('/Update',verify(['ADMIN']),upload.single('BookCover'),UpdateBook);
 
 router.delete('/Delete',verify(['ADMIN']),RemoveBook);
 
-router.put('/Vote',BookVote);
+// router.put('/Vote',BookVote);
 
-router.get('/Vote/Count',TotalVoteData);
+// router.get('/Vote/Count',TotalVoteData);
 
 module.exports=router
