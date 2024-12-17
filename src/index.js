@@ -5,8 +5,8 @@ const express = require('express')
 const app=express()
 const helmet = require('helmet')
 const cors=require('cors')
-const csurf = require('csurf');
-const csrfProtection = csurf({ cookie: true });
+// const csurf = require('csurf');
+// const csrfProtection = csurf({ cookie: true });
 
 
 
@@ -23,7 +23,7 @@ const multer=require('multer');
 const port = process.env.PORT || 1000;
 
 app.use(helmet());
-app.use(csrfProtection);
+// app.use(csrfProtection);
 app.use(cors({
     origin: 
     [
