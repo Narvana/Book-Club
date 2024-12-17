@@ -27,16 +27,16 @@ const CreateAdminBookVote=async(req,res,next)=>{
 
         BookIDs=req.body.BookIDs;
 
-        console.log(BookIDs);
+        // console.log(BookIDs);
         
 
         const BookLength=BookIDs.length;
         
-        console.log(BookLength);
+        // console.log(BookLength);
         
         
-        if(BookLength === 0 || BookLength === 1){
-            return next(ApiErrors(400,'Book IDs are required. Provide More than 1 BookID '));
+        if(BookLength === 0){
+            return next(ApiErrors(400,'Book IDs are required'));
         }
         for (const id of BookIDs) {            
             const CheckBook= await Book.findById(id);
