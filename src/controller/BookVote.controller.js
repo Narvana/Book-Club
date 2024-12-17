@@ -5,6 +5,92 @@ const ApiSuccess = require('../utils/ApiResponse/ApiSuccess');
 
 const Book=require('../model/Book.model');
 const BookVote = require('../model/BookVote.model');
+const ApiErrors = require('../utils/ApiResponse/ApiError');
+
+
+const CreateAdminBookVote=async(req,res,next)=>{
+
+    try {        
+        // let {BookIDs}=req.body;
+
+        const Month=["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+        const d = new Date();
+        
+        let year = d.getFullYear();
+        let month= Month[d.getMonth()];
+
+        let VoteData={
+            VoteMonth: month,
+            VoteYear: year
+        }
+
+        BookIDs=req.body.BookIDs;
+
+        console.log(BookIDs);
+        
+
+        const BookLength=BookIDs.length;
+        
+        console.log(BookLength);
+        
+        
+        if(BookLength === 0 || BookLength === 1){
+            return next(ApiErrors(400,'Book IDs are required. Provide More than 1 BookID '));
+        }
+        for (const id of BookIDs) {            
+            const CheckBook= await Book.findById(id);
+            if(!CheckBook)
+            {
+                return next(ApiErrors(400,`Book with id -: ${id} not found `));
+            }
+
+
+            const CheckBookVote= await BookVote.find({
+                'BookID':id,
+                "VoteData.VoteMonth": VoteData.VoteMonth,
+                "VoteData.VoteYear": VoteData.VoteYear
+            })
+            if(CheckBookVote)
+            {
+                return next(ApiErrors(400,`Book Vote with Book ID -: ${id}  already exist.`));
+            }
+        }
+        for (const id of BookIDs) {            
+            const AddBookVotes = new BookVote({
+                VoteData,
+                BookID: id
+            });
+            await AddBookVotes.save(); 
+        }
+
+        const bookVoteList = await BookVote.find({
+            "VoteData.VoteMonth": VoteData.VoteMonth,
+            "VoteData.VoteYear": VoteData.VoteYear
+        })
+        .populate({
+            path: 'BookID', 
+            select: 'title' // Only fetch the 'title' field
+        });
+
+        return next(ApiSuccess(200,bookVoteList,`BookVote List created for ${VoteData.VoteYear} `))
+
+
+    } catch (error) {
+       console.log(
+            {
+                'Internal Serve Error, ' : error.message,
+                error
+            }
+        );
+        if(error.name === 'ValidationError')
+        {
+            const errorMessages = Object.values(error.errors).map(error => error.message);
+            return next(ApiError(500,errorMessages[0]));            
+        }
+        return next(ApiError(500, `An error occurred while voting for the book ${error.message}`)); 
+    }
+}
 
 const Vote=async(req,res,next)=>{
 
@@ -12,7 +98,7 @@ const Vote=async(req,res,next)=>{
     const id=req.query.BookID;
     if(!id)
     {
-        return next(ApiError(400,'Choose a the Book You want to vote for'))
+        return next(ApiError(400,`Choose a the Book You want to vote for` ))
     }
     else if(!email)
     {
@@ -56,9 +142,7 @@ const Vote=async(req,res,next)=>{
     //  return   console.log(bookVote);  
 
         if(bookVote.length > 0)
-        {    
-           
-                    
+        {          
             for (const vote of bookVote) {            
                 if (vote.VoteData.Votes.includes(email)) {
                     return next(ApiError(400, `${email} have already voted for book title ${vote.BookID.title}.`));
@@ -71,19 +155,19 @@ const Vote=async(req,res,next)=>{
                     vote.VoteData.Votes.push(email); 
                     await vote.save();
                     return next(ApiSuccess(200,vote,`${email} voted for ${vote.BookID.title}`))
-                    // votedBook = vote; 
-                    // break; 
                 }
             }
         }
-        VoteData.Votes = [email]; 
-        const newBookVote = new BookVote({
-            BookID: id,
-            VoteData,
-        });
-        const savedVote = await newBookVote.save();
+        return next(ApiError(400,`No Book Found for voting for Month ${VoteData.VoteMonth} and Year ${VoteData.VoteYear}`));
 
-        return next(ApiSuccess(201,savedVote,`${email} voted for ${book.title}`))
+        // VoteData.Votes = [email]; 
+        // const newBookVote = new BookVote({
+        //     BookID: id,
+        //     VoteData,
+        // });
+        // const savedVote = await newBookVote.save();
+
+        // return next(ApiSuccess(201,savedVote,`${email} voted for ${book.title}`))
 
     } catch (error) {
         console.log(
@@ -187,6 +271,7 @@ const getBookVotePercent=async(req,res,next)=>{
              },
             {
                 $project:{
+                    BookVoteID: '$_id',
                     BookID:'$BookDetails._id',
                     title: '$BookDetails.title',     
                     BookCover: '$BookDetails.BookCover',     
@@ -210,6 +295,7 @@ const getBookVotePercent=async(req,res,next)=>{
             },
             {
                 $project: {
+                    _id: '$Books.BookVoteID',
                     BookID: '$Books.BookID',
                     title: '$Books.title',
                     BookCover: '$Books.BookCover',
@@ -257,7 +343,7 @@ const getBookVotePercent=async(req,res,next)=>{
             'VoteMonth':month,
             books
         }
-        ,`Book Votes`))        
+        ,`Book Votes`));        
     } catch (error) {
         console.log(
             {
@@ -270,9 +356,45 @@ const getBookVotePercent=async(req,res,next)=>{
     }
 }
 
+const RemoveBookVote=async(req,res,next)=>{
+    try {
+        const id=req.query.BookVoteID;
+        if(!id)
+        {
+            return next(ApiError(400, `Please provide the Book Vote ID that you want to remove`));   
+        }
+
+        const CheckBookVote = await BookVote.findById(id);
+        
+        if(!CheckBookVote)
+        {
+            return next(ApiError(400, `No Book Vote found with provided ID`));   
+        }
+        await BookVote.findByIdAndDelete(id);
+
+        return next(ApiSuccess(200,
+            []
+            ,`Book Vote Removed`));
+    
+    } catch (error) {
+        console.log(
+            {
+                'Internal Serve Error, ' : error.message,
+                error
+            }
+        );
+
+        return next(ApiError(500, `An error occurred while voting for the book ${error.message}`));   
+    }
+
+
+}
+
 module.exports={
+    CreateAdminBookVote,
     Vote,
     getBookVote,
-    getBookVotePercent
+    getBookVotePercent,
+    RemoveBookVote
 }
 
