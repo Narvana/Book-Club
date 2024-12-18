@@ -16,6 +16,7 @@ const AuthRoute=require('./route/auth.router');
 const BookRoute = require('./route/Book.router');
 const AuthorRoute = require('./route/Author.router');
 const BookVoteRoute= require('./route/BookVote.route');
+const BookWonRoute= require('./route/BookWon.route');
 
 const mongoose = require('mongoose');
 const multer=require('multer');
@@ -45,6 +46,7 @@ app.use('/api/auth',AuthRoute);
 app.use('/api/Book',BookRoute);
 app.use('/api/Author',AuthorRoute);
 app.use('/api/Book/Vote',BookVoteRoute);
+app.use('/api/Book/Won',BookWonRoute);
 
 
 app.use((err, req, res, next) => {
