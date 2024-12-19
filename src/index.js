@@ -5,12 +5,13 @@ const express = require('express')
 const app=express()
 const helmet = require('helmet')
 const cors=require('cors')
-// const csurf = require('csurf');
-// const csrfProtection = csurf({ cookie: true });
-
-
-
 const cookieParser=require('cookie-parser')
+// const csrf = require('csurf');
+// const csrfProtection = csrf({ cookie: true });
+
+
+
+
 
 const AuthRoute=require('./route/auth.router');
 const BookRoute = require('./route/Book.router');
@@ -31,7 +32,8 @@ app.use(cors({
         "http://localhost:3000",
         "http://localhost:5173",
         "https://bookclubadmin.netlify.app",
-        "https://bookclubadmin.vercel.app"
+        "https://bookclubadmin.vercel.app",
+        "https://wgbookclub.netlify.app"
     ],
     methods:["GET","POST","PUT","DELETE"],
     credentials:true,
