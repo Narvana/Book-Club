@@ -115,6 +115,8 @@ const CheckWinner= async(req,res,next)=>{
             return book.VotePercent > max.VotePercent ? book : max;
         }, books[0]);
 
+        // return console.log(bookWithMaxVotePercent);        
+
         const CheckBookWon=await BookWon.find({
                  Month: month,
                  Year: year
@@ -122,36 +124,34 @@ const CheckWinner= async(req,res,next)=>{
 
         if(CheckBookWon.length === 1)
         {
-            CheckBookWon[0].BookID = bookWithMaxVotePercent.BookID;
-
-            // return console.log(
-            //     {
-            //     CheckBookWon,
-            //     bookWithMaxVotePercent
-            // });
+            // CheckBookWon[0].BookID = bookWithMaxVotePercent.BookID;
+            CheckBookWon[0].Booktitle = bookWithMaxVotePercent.title;
+            CheckBookWon[0].BookCover = bookWithMaxVotePercent.BookCover;
+            CheckBookWon[0].AuthorName = bookWithMaxVotePercent.AuthorName;
 
             await CheckBookWon[0].save();
 
-            const updatedBookWon = await CheckBookWon[0].populate({
-                path: 'BookID',
-                select: 'title author description' 
-            });
+            // const updatedBookWon = await CheckBookWon;
         
-            return next(ApiSuccess(200, updatedBookWon, 'Book Won updated with book details'));
+            return next(ApiSuccess(200, CheckBookWon[0], `Book Won ${CheckBookWon[0].Booktitle} updated with book details`));
         }
         const CreateBookWon= new BookWon({
-            BookID:bookWithMaxVotePercent.BookID,
+            // BookID:bookWithMaxVotePercent.BookID,
+            Booktitle:bookWithMaxVotePercent.title,
+            BookCover:bookWithMaxVotePercent.BookCover,
+            AuthorName:bookWithMaxVotePercent.AuthorName,
             Month:month,
             Year:year
         });
         await CreateBookWon.save();
 
-        const newBookWon = await BookWon.findById(CreateBookWon._id).populate({
-            path: 'BookID',
-            select: 'title author description' // Fetch the 'title', 'author', etc.
-        });
+        const newBookWon = await BookWon.findById(CreateBookWon._id);
+        // .populate({
+        //     path: 'BookID',
+        //     select: 'title author description' 
+        // });
         
-        return next(ApiSuccess(200, newBookWon, 'Book Won created with book details'));        
+        return next(ApiSuccess(200, newBookWon, `Book Won ${newBookWon.Booktitle} created with book details`));        
 
     } catch (error) {
         console.log(
@@ -184,7 +184,7 @@ const GetBookWinner = async(req,res,next)=>{
             return next(ApiError(400, `Please Provide Month also`));   
         }
     
-        console.log({matchCondition});
+        // console.log({matchCondition});
     
         
         const getBookWon = await BookWon.aggregate([
@@ -192,37 +192,10 @@ const GetBookWinner = async(req,res,next)=>{
                 $match: matchCondition
             },
             {
-                $lookup:{
-                    from:"books",
-                    localField:"BookID",
-                    foreignField:"_id",
-                    as:"BookDetails"
-                }
-            },
-            {
-                $unwind:{
-                    path:'$BookDetails'
-                }
-            },
-            {
-                $lookup:{
-                    from:"authors",
-                    localField:"BookDetails.authorID",
-                    foreignField:"_id",
-                    as:"AuthorDetails"
-                }
-            },
-            {
-                $unwind:{
-                    path:'$AuthorDetails'
-                }
-            },
-            {
                 $project:{
-                    BookTitle:'$BookDetails.title',
-                    BookAuthor:'$AuthorDetails.authorName',
-                    BookCover:'$BookDetails.BookCover',
-                    BookTitle:'$BookDetails.title',
+                    Booktitle:1 ,
+                    AuthorName: 1,
+                    BookCover:1,
                     Month:1,
                     Year:1
                 }
@@ -245,6 +218,8 @@ const GetBookWinner = async(req,res,next)=>{
         return next(ApiError(500, `An error occurred while voting for the book ${error.message}`));      
     }
 }
+
+
 
 module.exports={
     CheckWinner,
