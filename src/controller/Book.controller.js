@@ -7,6 +7,7 @@ const {uploadToFirebase}=require('../middleware/ImageUpload/firebaseConfig');
 
 const author=require('../model/author.model');
 const Book=require('../model/Book.model');
+const { default: mongoose } = require('mongoose');
 
 const EnterBook =  async(req,res,next)=>{
     
@@ -82,8 +83,20 @@ const EnterBook =  async(req,res,next)=>{
 
 const GetBooks=async(req,res,next)=>{
 
+    const {id} = req.query;
+
+    let matchCondition = {};
+
+    if(id)
+    {
+        matchCondition['_id'] = new mongoose.Types.ObjectId(id);
+    }    
+
     try {
          const Books=await Book.aggregate([
+            {
+                $match:matchCondition
+            },
             {
                 $lookup:{
                     from:'authors',
@@ -117,7 +130,7 @@ const GetBooks=async(req,res,next)=>{
 
         if(BookCount === 0)
         {
-            return next(ApiError(400, 'No Book Add'));
+            return next(ApiError(400, 'No Book found'));
         }
         return next(ApiSuccess(200, Books ,`Total Books Count -: ${BookCount}`));
     } catch (error) {
