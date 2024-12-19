@@ -13,68 +13,144 @@ const CreateAdminBookVote=async(req,res,next)=>{
     try {        
         // let {BookIDs}=req.body;
 
-        const Month=["January","February","March","April","May","June","July","August","September","October","November","December"];
+        // const Month=["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+        // const d = new Date();
+        
+        // let year = d.getFullYear();
+        // let month= Month[d.getMonth()];
+
+        // let VoteData={
+        //     VoteMonth: month,
+        //     VoteYear: year
+        // }
+
+        // BookIDs=req.body.BookIDs;
+
+        // // console.log(BookIDs);
+        
+
+        // const BookLength=BookIDs.length;
+        
+        // // console.log(BookLength);
+        
+        
+        // if(BookLength === 0){
+        //     return next(ApiErrors(400,'Book IDs are required'));
+        // }
+
+
+        // for (const id of BookIDs) {            
+        //     const CheckBook= await Book.findById(id);
+        //     if(!CheckBook)
+        //     {
+        //         return next(ApiErrors(400,`Book with id -: ${id} not found `));
+        //     }
+        //     const CheckBookVote= await BookVote.find({
+        //         'BookID':id,
+        //         "VoteData.VoteMonth": VoteData.VoteMonth,
+        //         "VoteData.VoteYear": VoteData.VoteYear
+        //     })
+
+        //     // return console.log(CheckBookVote[0].BookID.equals(id));
+        
+        //     if(CheckBookVote.length > 0 && CheckBookVote[0].BookID.equals(id))
+        //     {
+        //         return next(ApiErrors(400,`Book Vote with Book ID -: ${id}  already exist.`));
+        //     }
+        // }
+        // for (const id of BookIDs) {            
+        //     const AddBookVotes = new BookVote({
+        //         VoteData,
+        //         BookID: id
+        //     });
+        //     await AddBookVotes.save(); 
+        // }
+
+        // const bookVoteList = await BookVote.find({
+        //     "VoteData.VoteMonth": VoteData.VoteMonth,
+        //     "VoteData.VoteYear": VoteData.VoteYear
+        // })
+        // .populate({
+        //     path: 'BookID', 
+        //     select: 'title' // Only fetch the 'title' field
+        // });
+
+        // return next(ApiSuccess(200,bookVoteList,`BookVote List created for ${VoteData.VoteYear} `))
+
+        const { BookIDs } = req.body;
+
+        const Month = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
 
         const d = new Date();
-        
-        let year = d.getFullYear();
-        let month= Month[d.getMonth()];
+        const year = d.getFullYear();
+        const month = Month[d.getMonth()];
 
-        let VoteData={
+        const VoteData = {
             VoteMonth: month,
-            VoteYear: year
+            VoteYear: year,
+        };
+
+        // 1. Validate Input
+        if (!BookIDs || !BookIDs.length) {
+            return next(ApiErrors(400, "Book IDs are required"));
         }
 
-        BookIDs=req.body.BookIDs;
+        // 2. Fetch All Books and Votes in Bulk
+        const [books, existingVotes] = await Promise.all([
+            Book.find({ _id: { $in: BookIDs } }), // Fetch all books in one query
+            BookVote.find({
+                BookID: { $in: BookIDs },
+                "VoteData.VoteMonth": month,
+                "VoteData.VoteYear": year,
+            }).select('BookID'), // Fetch votes for the given month/year in one query
+        ]);
 
-        // console.log(BookIDs);
+        // console.log({books,existingVotes});
         
-
-        const BookLength=BookIDs.length;
+        // 3. Check for Missing Books and Existing Votes
+        const validBookIDs = new Set(books.map((book) => book._id.toString()));
         
-        // console.log(BookLength);
-        
-        
-        if(BookLength === 0){
-            return next(ApiErrors(400,'Book IDs are required'));
-        }
-        for (const id of BookIDs) {            
-            const CheckBook= await Book.findById(id);
-            if(!CheckBook)
-            {
-                return next(ApiErrors(400,`Book with id -: ${id} not found `));
-            }
-            const CheckBookVote= await BookVote.find({
-                'BookID':id,
-                "VoteData.VoteMonth": VoteData.VoteMonth,
-                "VoteData.VoteYear": VoteData.VoteYear
-            })
-
-            // return console.log(CheckBookVote[0].BookID.equals(id));
-        
-            if(CheckBookVote.length > 0 && CheckBookVote[0].BookID.equals(id))
-            {
-                return next(ApiErrors(400,`Book Vote with Book ID -: ${id}  already exist.`));
-            }
-        }
-        for (const id of BookIDs) {            
-            const AddBookVotes = new BookVote({
-                VoteData,
-                BookID: id
-            });
-            await AddBookVotes.save(); 
+        const missingBooks = BookIDs.filter((id) => !validBookIDs.has(id));
+        if (missingBooks.length) {
+            return next(ApiErrors(400, `Books not found: ${missingBooks.join(", ")}`));
         }
 
+        const existingVoteIDs = new Set(existingVotes.map((vote) => vote.BookID.toString()));
+
+        const duplicateVotes = BookIDs.filter((id) => existingVoteIDs.has(id));
+
+        if (duplicateVotes.length) {
+            return next(ApiErrors(400, `Votes already exist for Books: ${duplicateVotes.join(", ")}`));
+        }
+
+        // 4. Prepare Bulk Insert Data
+        const voteDataArray = BookIDs.map((id) => ({
+            BookID: id,
+            VoteData,
+        }));
+
+        // return console.log(voteDataArray);
+        
+
+        // 5. Batch Insert Votes
+        await BookVote.insertMany(voteDataArray);
+
+        // 6. Fetch and Return Updated Vote List
         const bookVoteList = await BookVote.find({
-            "VoteData.VoteMonth": VoteData.VoteMonth,
-            "VoteData.VoteYear": VoteData.VoteYear
-        })
-        .populate({
-            path: 'BookID', 
-            select: 'title' // Only fetch the 'title' field
+            "VoteData.VoteMonth": month,
+            "VoteData.VoteYear": year,
+        }).populate({
+            path: "BookID",
+            select: "title",
         });
 
-        return next(ApiSuccess(200,bookVoteList,`BookVote List created for ${VoteData.VoteYear} `))
+        return next(
+            ApiSuccess(200, bookVoteList, `BookVote List created for ${year}`)
+        );
 
 
     } catch (error) {
@@ -144,14 +220,16 @@ const Vote=async(req,res,next)=>{
 
         if(bookVote.length > 0)
         {          
-            for (const vote of bookVote) {            
+            for (const vote of bookVote) {     
+                // return   console.log(vote);         
                 if (vote.VoteData.Votes.includes(email)) {
                     return next(ApiError(400, `${email} have already voted for book title ${vote.BookID.title}.`));
                 } 
             }
             // return console.log('by');
             for (const vote of bookVote) {
-                if (vote.BookID._id.equals(id)) 
+                // return   console.log(vote.BookID._id);     
+                if (vote.BookID && vote.BookID._id && vote.BookID._id.equals(id)) 
                 { 
                     vote.VoteData.Votes.push(email); 
                     await vote.save();
@@ -270,7 +348,7 @@ const getBookVotePercent=async(req,res,next)=>{
                      path:'$AuthorDetails'
                  }
              },
-            {
+             {
                 $project:{
                     BookVoteID: '$_id',
                     BookID:'$BookDetails._id',
@@ -281,8 +359,8 @@ const getBookVotePercent=async(req,res,next)=>{
                     AuthorName : '$AuthorDetails.authorName',
                     TotalVote: { $size: '$VoteData.Votes' }
                 }                     
-            },
-            {
+             },
+             {
                 $group: {
                     _id: null,
                     TotalVotesAcrossBooks: { $sum: '$TotalVote' }, 
@@ -332,13 +410,7 @@ const getBookVotePercent=async(req,res,next)=>{
             }
         ]);
 
-        const bookWithMaxVotePercent = books.reduce((max, book) => {
-            return book.VotePercent > max.VotePercent ? book : max;
-        }, books[0]);
-        
-        console.log(bookWithMaxVotePercent);
-
-        return next(ApiSuccess(201,
+        return next(ApiSuccess(200,
         {
             'VoteYear' : year,
             'VoteMonth':month,
@@ -346,7 +418,7 @@ const getBookVotePercent=async(req,res,next)=>{
         }
         ,`Book Votes`));        
     } catch (error) {
-        console.log(
+        console.log( 
             {
                 'Internal Serve Error, ' : error.message,
                 error
