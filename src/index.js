@@ -10,15 +10,13 @@ const cookieParser=require('cookie-parser')
 // const csrfProtection = csrf({ cookie: true });
 
 
-
-
-
 const AuthRoute=require('./route/auth.router');
 const BookRoute = require('./route/Book.router');
 const AuthorRoute = require('./route/Author.router');
 const BookVoteRoute= require('./route/BookVote.route');
 const BookWonRoute= require('./route/BookWon.route');
 const FilterRoute = require('./route/Filter.route');
+const DiscussionRoute=require('./route/BookDiscussion.route');
 
 const mongoose = require('mongoose');
 const multer=require('multer');
@@ -51,6 +49,7 @@ app.use('/api/Author',AuthorRoute);
 app.use('/api/Book/Vote',BookVoteRoute);
 app.use('/api/Book/Won',BookWonRoute);
 app.use('/api/Filter',FilterRoute);
+app.use('/api/Discussion',DiscussionRoute);
 
 
 app.use((err, req, res, next) => {
