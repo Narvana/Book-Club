@@ -5,11 +5,8 @@ const ApiSuccess = require('../utils/ApiResponse/ApiSuccess');
 
 const Book=require('../model/Book.model');
 const BookVote = require('../model/BookVote.model');
-const ApiErrors = require('../utils/ApiResponse/ApiError');
-
 
 const CreateAdminBookVote=async(req,res,next)=>{
-
     try {        
         // let {BookIDs}=req.body;
 
@@ -90,13 +87,13 @@ const CreateAdminBookVote=async(req,res,next)=>{
         const month = Month[d.getMonth()];
 
         const VoteData = {
-            VoteMonth: month,
+            VoteMonth: 'November',
             VoteYear: year,
         };
 
         // 1. Validate Input
         if (!BookIDs || !BookIDs.length) {
-            return next(ApiErrors(400, "Book IDs are required"));
+            return next(ApiError(400, "Book IDs are required"));
         }
 
         // 2. Fetch All Books and Votes in Bulk
@@ -104,8 +101,8 @@ const CreateAdminBookVote=async(req,res,next)=>{
             Book.find({ _id: { $in: BookIDs } }), // Fetch all books in one query
             BookVote.find({
                 BookID: { $in: BookIDs },
-                "VoteData.VoteMonth": month,
-                "VoteData.VoteYear": year,
+                "VoteData.VoteMonth": VoteData.VoteMonth,
+                "VoteData.VoteYear":  VoteData.VoteYear,
             }).select('BookID'), // Fetch votes for the given month/year in one query
         ]);
 
@@ -116,7 +113,7 @@ const CreateAdminBookVote=async(req,res,next)=>{
         
         const missingBooks = BookIDs.filter((id) => !validBookIDs.has(id));
         if (missingBooks.length) {
-            return next(ApiErrors(400, `Books not found: ${missingBooks.join(", ")}`));
+            return next(ApiError(400, `Books not found: ${missingBooks.join(", ")}`));
         }
 
         const existingVoteIDs = new Set(existingVotes.map((vote) => vote.BookID.toString()));
@@ -124,7 +121,7 @@ const CreateAdminBookVote=async(req,res,next)=>{
         const duplicateVotes = BookIDs.filter((id) => existingVoteIDs.has(id));
 
         if (duplicateVotes.length) {
-            return next(ApiErrors(400, `Votes already exist for Books: ${duplicateVotes.join(", ")}`));
+            return next(ApiError(400, `Votes already exist for Books: ${duplicateVotes.join(", ")}`));
         }
 
         // 4. Prepare Bulk Insert Data
@@ -135,14 +132,13 @@ const CreateAdminBookVote=async(req,res,next)=>{
 
         // return console.log(voteDataArray);
         
-
         // 5. Batch Insert Votes
         await BookVote.insertMany(voteDataArray);
 
         // 6. Fetch and Return Updated Vote List
         const bookVoteList = await BookVote.find({
-            "VoteData.VoteMonth": month,
-            "VoteData.VoteYear": year,
+            "VoteData.VoteMonth": VoteData.VoteMonth,
+            "VoteData.VoteYear": VoteData.VoteYear,
         }).populate({
             path: "BookID",
             select: "title",
@@ -283,6 +279,7 @@ const getBookVote=async(req,res,next)=>{
             },
             {
                 $project:{
+                    BookID: '$BookDetails._id',
                     title: '$BookDetails.title',     
                     VoteData:1
                 }                        
