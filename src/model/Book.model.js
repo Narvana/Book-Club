@@ -8,7 +8,7 @@ const BookSchema=new mongoose.Schema({
     },
     authorID:{
         type: mongoose.Schema.Types.ObjectID,
-        ref:'Author',
+        ref:'authors',
         required:[true,'Author Data is required']
     },
     publication: {
