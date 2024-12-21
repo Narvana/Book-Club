@@ -10,7 +10,7 @@ const BookDiscussion = require('../model/BookDiscussion.model');
 const AddBookDiscussion=async(req,res,next)=>{
 
     const id=req.query.BookID;
-    const {DiscussionDate,DiscussionStartTime,DiscussionEndTime}=req.body;
+    const {DiscussionDate,DiscussionStartTime,DiscussionEndTime,DiscussionLink}=req.body;
     let BookFind;
 
     try 
@@ -29,7 +29,8 @@ const AddBookDiscussion=async(req,res,next)=>{
                 BookID:id,
                 DiscussionDate,
                 DiscussionStartTime,
-                DiscussionEndTime
+                DiscussionEndTime,
+                DiscussionLink
             })
             const SaveDiscussion = await CreateDiscussion.save();
             
@@ -39,6 +40,8 @@ const AddBookDiscussion=async(req,res,next)=>{
         BookDiscussionResult.DiscussionDate = DiscussionDate || BookDiscussionResult.DiscussionDate;
         BookDiscussionResult.DiscussionStartTime = DiscussionStartTime || BookDiscussionResult.DiscussionStartTime;
         BookDiscussionResult.DiscussionEndTime = DiscussionEndTime || BookDiscussionResult.DiscussionEndTime;
+        BookDiscussionResult.DiscussionLink = DiscussionLink || BookDiscussionResult.DiscussionLink;
+
 
         await BookDiscussionResult.save();
         return next(ApiSuccess(200,BookDiscussionResult,'Discussion Form Updated'));       
@@ -108,7 +111,8 @@ const getBookDiscussion=async(req,res,next)=>{
                     Author:"$AuthorDetails.authorName",
                     DiscussionDate:"$FormattedDiscussionDate",
                     DiscussionStartTime: 1,
-                    DiscussionEndTime: 1
+                    DiscussionEndTime: 1,
+                    DiscussionLink:1
                 }
             }
         ]
