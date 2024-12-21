@@ -50,6 +50,10 @@ const DiscussionSchema= new mongoose.Schema({
             //     message: 'Discussion Start Time must be earlier than Discussion End Time.'
             // }
         ]
+    },
+    DiscussionLink:{
+        type:String,
+        required:[true,"Please Provide Discussion Link"]
     }
 })
 
