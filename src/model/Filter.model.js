@@ -13,6 +13,10 @@ const filterSchema=new mongoose.Schema({
     year:{
         type:String,
         default:null
+    },
+    discussion:{
+        type:Boolean,
+        default:false
     }
 })
 
