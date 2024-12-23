@@ -4,7 +4,6 @@ const ApiSuccess = require('../utils/ApiResponse/ApiSuccess');
 const Book=require('../model/Book.model');
 const Comment = require('../model/comment.model');
 
-
 const WriteComment = async(req,res,next)=>{
     try {
         const id=req.query.BookID
@@ -70,7 +69,35 @@ const GetComments=async(req,res,next)=>{
     }
 }
 
+const DeleteComment=async(req,res,next)=>{
+
+    try {
+        const id=req.query.CommentID;
+        if(!id)
+        {
+            return next(ApiError(400, `Comment ID is required`));
+        }
+        const FindComment = await Comment.findById(id);
+        // console.log(FindComment);        
+        if(!FindComment)
+        {
+            return next(ApiError(400, `No Comment found`));
+        }
+        await Comment.findByIdAndDelete(id);        
+        return next(ApiSuccess(200,[],`Comment removed`));
+    } catch (error) {
+        console.log(
+        {
+            'Internal Serve Error, ' : error.message,
+            error
+        }
+        );
+        return next(ApiError(500, `An error occurred while voting for the book ${error.message} , ${error.stack}`));  
+    }
+}
+
 module.exports={
     WriteComment,
-    GetComments
+    GetComments,
+    DeleteComment
 }
