@@ -12,7 +12,7 @@ router.post('/List/Add/Admin',verify(['ADMIN']),CreateAdminBookVote)
  
 router.post('/Add',Vote);
 
-router.get('/Count',getBookVote);
+router.get('/Nominees',getBookVote);
 
 router.get('/Percent',getBookVotePercent);
 
