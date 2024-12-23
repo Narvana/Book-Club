@@ -278,9 +278,24 @@ const getBookVote=async(req,res,next)=>{
                 }
             },
             {
+                $lookup:{
+                     from:'authors',
+                     localField: 'BookDetails.authorID',
+                     foreignField: '_id',
+                     as: 'AuthorDetails'
+                 }
+             },
+             {
+                 $unwind:{
+                     path:'$AuthorDetails'
+                 }
+             },
+            {
                 $project:{
                     BookID: '$BookDetails._id',
+                    BookCover:'$BookDetails.BookCover',
                     title: '$BookDetails.title',     
+                    AuthorName:'$AuthorDetails.authorName',
                     VoteData:1
                 }                        
             }
@@ -297,7 +312,6 @@ const getBookVote=async(req,res,next)=>{
                 error
             }
         );
-
         return next(ApiError(500, `An error occurred while voting for the book ${error.message}`));   
     }
 }
