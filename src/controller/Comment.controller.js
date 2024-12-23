@@ -38,7 +38,7 @@ const WriteComment = async(req,res,next)=>{
                 const errorMessages = Object.values(error.errors).map(error => error.message);
                 return next(ApiError(500,`Validation error -: ${errorMessages[0]}`));            
             }
-        return next(ApiError(500, `An error occurred while voting for the book ${error.message} , ${error.stack}`));  
+        return next(ApiError(500, `An error occurred ${error.message} , ${error.stack}`));  
     }
 }
   
@@ -65,7 +65,7 @@ const GetComments=async(req,res,next)=>{
         }
         );
         
-        return next(ApiError(500, `An error occurred while voting for the book ${error.message} , ${error.stack}`));          
+        return next(ApiError(500, `An error occurred ${error.message} , ${error.stack}`));          
     }
 }
 
@@ -92,7 +92,7 @@ const DeleteComment=async(req,res,next)=>{
             error
         }
         );
-        return next(ApiError(500, `An error occurred while voting for the book ${error.message} , ${error.stack}`));  
+        return next(ApiError(500, `An error occurred ${error.message} , ${error.stack}`));  
     }
 }
 
