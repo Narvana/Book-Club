@@ -229,7 +229,8 @@ const GetBookWinner = async(req,res,next)=>{
                     title: '$BookDetails.title',     
                     AuthorName:'$AuthorDetails.authorName',
                     Month:1,
-                    Year:1
+                    Year:1,
+                    Theme:1
                 }
             }
         ]);
@@ -250,10 +251,42 @@ const GetBookWinner = async(req,res,next)=>{
         return next(ApiError(500, `An error occurred while voting for the book ${error.message}`));      
     }
 }
+const UpdateBookWonTheme = async(req,res,next)=>{
 
+    try {
+        const id= req.query.BookWonID
+        if(!id)
+        {
+          return next(ApiError(400,'Please provide Book Won ID'));
+        }
+        const FindBookWon= await BookWon.findById(id);
+        if(!FindBookWon)
+        {
+          return next(ApiError(400,'No Book Won Found with provided ID'));
+        }
+        const {Theme}=req.body;
+        if(!Theme)
+        {
+            return next(ApiError(400,'Please Provide The Theme'));
+        }
+        FindBookWon.Theme=Theme;
+        await FindBookWon.save();
+        return next(ApiError(200,FindBookWon,'Book Won Updated'));         
+    } catch (error) {
+        console.log(
+            {
+                'Internal Serve Error, ' : error.message,
+                error
+            }
+            );
+            return next(ApiError(500, `An error occurred ${error.message} , ${error.stack}`));  
+    }
+
+}
 
 
 module.exports={
     CheckWinner,
-    GetBookWinner
+    GetBookWinner,
+    UpdateBookWonTheme
 }
