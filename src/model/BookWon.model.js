@@ -25,6 +25,10 @@ const BookWonSchema = new mongoose.Schema({
     Year:{
         type:String,
         required: [true, 'Year is required']
+    },
+    Theme:{
+        type:String,
+        default:null
     }
 });
 
