@@ -24,6 +24,7 @@ const FilterRoute = require('./route/Filter.route');
 const DiscussionRoute=require('./route/BookDiscussion.route');
 const CommentRoute=require('./route/comment.route');
 const NewsLetterRoute=require('./route/NewsLetter.router');
+const ContactUserRoute=require('./route/ContactUser.router');
 
 
 app.use(helmet());
@@ -55,6 +56,7 @@ app.use('/api/Filter',FilterRoute);
 app.use('/api/Discussion',DiscussionRoute);
 app.use('/api/Comment',CommentRoute);
 app.use('/api/NewsLetter',NewsLetterRoute);
+app.use('/api/Contact/User',ContactUserRoute);
 
 app.use((err, req, res, next) => {
     if (err instanceof multer.MulterError) 
