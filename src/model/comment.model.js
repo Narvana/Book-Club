@@ -15,13 +15,14 @@ const CommentSchema = new mongoose.Schema({
     email:{
         type:String,
         required:[true,'Email is required to comment'],
-        validate:{
-                validator(value){
-                    if(!validator.isEmail(value)){
-                       throw new Error("Write a Valid Email")
-                    }
+        validate:
+        {
+            validator(value){
+                if(!validator.isEmail(value)){
+                    throw new Error("Write a Valid Email")
                 }
             }
+        }
     },
     comment:{
         type:String,
