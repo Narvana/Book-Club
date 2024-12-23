@@ -8,7 +8,7 @@ const Comment = require('../model/comment.model');
 const WriteComment = async(req,res,next)=>{
     try {
         const id=req.query.BookID
-        const {email,comment} = req.body
+        const {email,name,comment} = req.body
     
         if(!id)
         {
@@ -21,11 +21,12 @@ const WriteComment = async(req,res,next)=>{
         }
         const CreateComment= new Comment({
             BookID:id,
+            name,
             email,
             comment
         });
         const SaveComment = await CreateComment.save();
-        return next(ApiSuccess(200,SaveComment,`${email} comment Saved Successfully`));        
+        return next(ApiSuccess(200,SaveComment,`${name} comment Saved Successfully`));        
     } catch (error) {
         console.log(
         {
@@ -43,7 +44,6 @@ const WriteComment = async(req,res,next)=>{
 }
   
 const GetComments=async(req,res,next)=>{
-
     const {BookID} = req.query;
     if(!BookID)
     {
@@ -52,14 +52,12 @@ const GetComments=async(req,res,next)=>{
     try {
         const Comments=await Comment.find({
             BookID
-        })
-    
+        })    
         if(Comments.length === 0)
         {
             return next(ApiError(400,'No Comment found'));
         }
-        return next(ApiSuccess(200,Comments,'All Comment'));
-            
+        return next(ApiSuccess(200,Comments,'All Comment'));   
     } catch (error) {
         console.log(
         {
