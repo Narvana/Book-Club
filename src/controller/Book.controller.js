@@ -8,6 +8,7 @@ const {uploadToFirebase}=require('../middleware/ImageUpload/firebaseConfig');
 const author=require('../model/author.model');
 const Book=require('../model/Book.model');
 const { default: mongoose } = require('mongoose');
+const BookVote = require('../model/BookVote.model');
 
 const EnterBook =  async(req,res,next)=>{
     
@@ -217,6 +218,19 @@ const RemoveBook=async(req,res,next)=>{
         {
             return next(ApiError(400,'No Book found with the Provided Book ID'));
         }
+        const CheckBookVote= await BookVote.find({
+            BookID:id
+        })
+        // let BookVoteID=[];
+        if(CheckBookVote.length > 0)
+        {
+            // CheckBookVote.map((BookVote)=>{
+            //     BookVoteID.push(BookVote._id);
+            // })
+            // await BookVote.deleteMany(BookVoteID);
+            await BookVote.deleteMany({ _id: { $in: CheckBookVote.map(vote => vote._id) } });
+        }       
+        // return console.log(BookVoteID); 
         await book.deleteOne();
         return next(ApiSuccess(200, [] ,`Book Removed`));
     } catch (error) {
@@ -230,25 +244,6 @@ const RemoveBook=async(req,res,next)=>{
     }
 }
 
-const GetAuthor=async(req,res,next)=>{
-    try {
-        const Author= await author.find();
-        const AuthorCount=Author.length
-        if(AuthorCount === 0)
-        {
-            return next(ApiError(400, 'No Author Found'));
-        }
-        return next(ApiSuccess(200, Author ,`Total Author Count -: ${AuthorCount}`));
-    } catch (error) {
-        console.log(
-            {
-                'Internal Serve Error, ' : error.message,
-                error
-            }
-        );
-        return next(ApiError(500, `Internal Server Error: ${error.message}`));
-    }
-}
 
 // const BookVote=async(req,res,next)=>{
 //     const email=req.query.Email;
@@ -427,7 +422,6 @@ module.exports={
     EnterBook,
     GetBooks,
     RemoveBook,
-    GetAuthor,
     UpdateBook,
     // BookVote,
     // TotalVoteData
