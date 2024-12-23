@@ -6,6 +6,11 @@ const app=express()
 const helmet = require('helmet')
 const cors=require('cors')
 const cookieParser=require('cookie-parser')
+const mongoose = require('mongoose');
+const multer=require('multer');
+
+const port = process.env.PORT || 1000;
+
 // const csrf = require('csurf');
 // const csrfProtection = csrf({ cookie: true });
 
@@ -17,11 +22,8 @@ const BookVoteRoute= require('./route/BookVote.route');
 const BookWonRoute= require('./route/BookWon.route');
 const FilterRoute = require('./route/Filter.route');
 const DiscussionRoute=require('./route/BookDiscussion.route');
+const CommentRoute=require('./route/comment.route');
 
-const mongoose = require('mongoose');
-const multer=require('multer');
-
-const port = process.env.PORT || 1000;
 
 app.use(helmet());
 // app.use(csrfProtection);
@@ -50,6 +52,7 @@ app.use('/api/Book/Vote',BookVoteRoute);
 app.use('/api/Book/Won',BookWonRoute);
 app.use('/api/Filter',FilterRoute);
 app.use('/api/Discussion',DiscussionRoute);
+app.use('/api/Comment',CommentRoute);
 
 
 app.use((err, req, res, next) => {
