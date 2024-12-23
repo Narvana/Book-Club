@@ -160,6 +160,11 @@ const CheckWinner= async(req,res,next)=>{
                 error
             }
         );
+        if(error.name === 'ValidationError')
+            {
+                const errorMessages = Object.values(error.errors).map(error => error.message);
+                return next(ApiError(500,`Validation error -: ${errorMessages[0]}`));            
+            }
 
         return next(ApiError(500, `An error occurred while voting for the book ${error.message}`));   
     }
