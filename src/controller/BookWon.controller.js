@@ -124,22 +124,22 @@ const CheckWinner= async(req,res,next)=>{
 
         if(CheckBookWon.length === 1)
         {
-            // CheckBookWon[0].BookID = bookWithMaxVotePercent.BookID;
-            CheckBookWon[0].Booktitle = bookWithMaxVotePercent.title;
-            CheckBookWon[0].BookCover = bookWithMaxVotePercent.BookCover;
-            CheckBookWon[0].AuthorName = bookWithMaxVotePercent.AuthorName;
+            CheckBookWon[0].BookID = bookWithMaxVotePercent.BookID;
+            // CheckBookWon[0].Booktitle = bookWithMaxVotePercent.title;
+            // CheckBookWon[0].BookCover = bookWithMaxVotePercent.BookCover;
+            // CheckBookWon[0].AuthorName = bookWithMaxVotePercent.AuthorName;
 
             await CheckBookWon[0].save();
 
             // const updatedBookWon = await CheckBookWon;
         
-            return next(ApiSuccess(200, CheckBookWon[0], `Book Won ${CheckBookWon[0].Booktitle} updated with book details`));
+            return next(ApiSuccess(200, CheckBookWon[0], `Book Won ${bookWithMaxVotePercent.title} updated with book details`));
         }
         const CreateBookWon= new BookWon({
-            // BookID:bookWithMaxVotePercent.BookID,
-            Booktitle:bookWithMaxVotePercent.title,
-            BookCover:bookWithMaxVotePercent.BookCover,
-            AuthorName:bookWithMaxVotePercent.AuthorName,
+            BookID:bookWithMaxVotePercent.BookID,
+            // Booktitle:bookWithMaxVotePercent.title,
+            // BookCover:bookWithMaxVotePercent.BookCover,
+            // AuthorName:bookWithMaxVotePercent.AuthorName,
             Month:month,
             Year:year
         });
@@ -151,7 +151,7 @@ const CheckWinner= async(req,res,next)=>{
         //     select: 'title author description' 
         // });
         
-        return next(ApiSuccess(200, newBookWon, `Book Won ${newBookWon.Booktitle} created with book details`));        
+        return next(ApiSuccess(200, newBookWon, `Book Won ${bookWithMaxVotePercent.title} created with book details`));        
 
     } catch (error) {
         console.log(
@@ -197,10 +197,37 @@ const GetBookWinner = async(req,res,next)=>{
                 $match: matchCondition
             },
             {
+                $lookup:{
+                     from:'books',
+                     localField: 'BookID',
+                     foreignField: '_id',
+                     as: 'BookDetails'
+                 }
+             },
+             {
+                 $unwind:{
+                     path:'$BookDetails'
+                 }
+             },
+             {
+                 $lookup:{
+                      from:'authors',
+                      localField: 'BookDetails.authorID',
+                      foreignField: '_id',
+                      as: 'AuthorDetails'
+                  }
+              },
+              {
+                  $unwind:{
+                      path:'$AuthorDetails'
+                  }
+              },
+              {
                 $project:{
-                    Booktitle:1 ,
-                    AuthorName: 1,
-                    BookCover:1,
+                    BookID: '$BookDetails._id',
+                    BookCover:'$BookDetails.BookCover',
+                    title: '$BookDetails.title',     
+                    AuthorName:'$AuthorDetails.authorName',
                     Month:1,
                     Year:1
                 }
