@@ -87,7 +87,7 @@ const CreateAdminBookVote=async(req,res,next)=>{
         const month = Month[d.getMonth()];
 
         const VoteData = {
-            VoteMonth: 'November',
+            VoteMonth: month,
             VoteYear: year,
         };
 
@@ -370,8 +370,7 @@ const getBookVotePercent=async(req,res,next)=>{
                     AuthorName : '$AuthorDetails.authorName',
                     TotalVote: { $size: '$VoteData.Votes' }
                 }                     
-             },
-             {
+             },             {
                 $group: {
                     _id: null,
                     TotalVotesAcrossBooks: { $sum: '$TotalVote' }, 
@@ -391,18 +390,18 @@ const getBookVotePercent=async(req,res,next)=>{
                     BookCover: '$Books.BookCover',
                     AuthorName: '$Books.AuthorName',
                     TotalVote: '$Books.TotalVote',
-                    VotePercent: {
-                        $cond: {
-                            if: { $gt: ['$TotalVotesAcrossBooks', 0] }, // Avoid division by zero
-                            then: {
-                                $multiply: [
-                                    { $divide: ['$Books.TotalVote', '$TotalVotesAcrossBooks'] },
-                                    100, // Convert to percentage
-                                ],
-                            },
-                            else: 0,
-                        },
-                    },
+                    // VotePercent: {
+                    //     $cond: {
+                    //         if: { $gt: ['$TotalVotesAcrossBooks', 0] }, // Avoid division by zero
+                    //         then: {
+                    //             $multiply: [
+                    //                 { $divide: ['$Books.TotalVote', '$TotalVotesAcrossBooks'] },
+                    //                 100, // Convert to percentage
+                    //             ],
+                    //         },
+                    //         else: 0,
+                    //     },
+                    // },
                     VotePercent: {
                         $round: {
                             $cond: {
@@ -420,6 +419,7 @@ const getBookVotePercent=async(req,res,next)=>{
                 },
             }
         ]);
+
 
         return next(ApiSuccess(200,
         {
