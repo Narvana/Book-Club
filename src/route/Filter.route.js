@@ -11,7 +11,7 @@ router.post('/Poll',verify(['ADMIN']),updatepoll);
 router.post('/MonthYear',verify(['ADMIN']),updateMonthYear);
 router.post('/Discussion',verify(['ADMIN']),updateDiscussion);
 
-router.get('/Get',verify(['ADMIN']),
+router.get('/Get',
 getFilter); 
 
 module.exports=router
