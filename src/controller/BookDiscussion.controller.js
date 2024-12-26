@@ -10,7 +10,7 @@ const BookDiscussion = require('../model/BookDiscussion.model');
 const AddBookDiscussion=async(req,res,next)=>{
 
     const id=req.query.BookID;
-    const {DiscussionDate,DiscussionStartTime,DiscussionEndTime,DiscussionLink}=req.body;
+    const {Theme,DiscussionDate,DiscussionStartTime,DiscussionEndTime,DiscussionLink}=req.body;
     let BookFind;
 
     try 
@@ -27,6 +27,7 @@ const AddBookDiscussion=async(req,res,next)=>{
         if(!BookDiscussionResult){
             const CreateDiscussion=new BookDiscussion({
                 BookID:id,
+                Theme,
                 DiscussionDate,
                 DiscussionStartTime,
                 DiscussionEndTime,
@@ -37,6 +38,7 @@ const AddBookDiscussion=async(req,res,next)=>{
             return next(ApiSuccess(200,SaveDiscussion,'Discussion Form created'));        
         } 
         BookDiscussionResult.BookID = id || BookDiscussionResult.DiscussionDate;    
+        BookDiscussionResult.Theme = Theme || BookDiscussionResult.Theme;    
         BookDiscussionResult.DiscussionDate = DiscussionDate || BookDiscussionResult.DiscussionDate;
         BookDiscussionResult.DiscussionStartTime = DiscussionStartTime || BookDiscussionResult.DiscussionStartTime;
         BookDiscussionResult.DiscussionEndTime = DiscussionEndTime || BookDiscussionResult.DiscussionEndTime;
@@ -109,6 +111,7 @@ const getBookDiscussion=async(req,res,next)=>{
                     BookTitle:"$BookDetails.title",
                     BookCover:"$BookDetails.BookCover",
                     Author:"$AuthorDetails.authorName",
+                    Theme: 1,
                     DiscussionDate:"$FormattedDiscussionDate",
                     DiscussionStartTime: 1,
                     DiscussionEndTime: 1,
