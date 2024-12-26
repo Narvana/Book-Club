@@ -7,6 +7,10 @@ const DiscussionSchema= new mongoose.Schema({
         ref: 'Book',
         required: [true,'Book ID is required']
     },
+    Theme:{
+        type: String,
+        default:null
+    },
     DiscussionDate:{
         type:Date,
         required: [true,'Discussion Date is required'],
