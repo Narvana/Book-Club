@@ -44,9 +44,39 @@ const EnterPodcast =  async(req,res,next)=>{
 
 const GetPodcast=async(req,res,next)=>{
 
+    const latestQuery = req.query.latest;
+
+        // Convert latest to a boolean if provided
+        let latest = null;
+        if (latestQuery !== undefined) {
+            if(latestQuery === 'true')
+            {
+                latest = latestQuery === 'true';
+            }
+            else if(latestQuery === 'false')
+            {
+                latest = latestQuery === 'true';
+            }
+
+        }
+
+        // Build match condition
+        const matchCondition = {};
+        if (latest !== null) {
+            matchCondition.latest = latest;  // Use boolean value for matching
+        }
+         console.log(matchCondition);
+    
     try {
-        const PodcastData=await Podcast.find();
-        if(PodcastData.count === 0)
+        const PodcastData=await Podcast.aggregate([
+            {
+                $match: matchCondition
+            }
+           ]
+        );
+
+
+        if(PodcastData.length === 0)
         {
             return next(ApiError(400,'No Podcast found'));   
         }
@@ -78,14 +108,28 @@ const UpdatePodcast=async(req,res,next)=>{
 
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
+            console.log(errors);
             return next(ApiError(400, errors.errors[0].msg)); // Return validation errors
         }    
 
-        const {title, description, dateTime, videoLink}=req.body;
+        const {title, description, dateTime, latest, videoLink}=req.body;
+        
 
-        if((!title || title.trim() === '') && (!description || description.trim() === '') && (!dateTime || dateTime.trim() === '') && ( !videoLink || videoLink.trim() === ''))
+        if((!title || title.trim() === '') && (!description || description.trim() === '') && (!dateTime || dateTime.trim() === '') && ( !videoLink || videoLink.trim() === '') && (!latest))
         {
-            return next(ApiError(400,'No data updated'));   
+            return next(ApiError(400,'No data provided to update'));   
+        }
+        if(latest && latest === "true")
+        {            
+            const CheckLatestPodcast = await Podcast.find({
+                // _id: new mongoose.Types.ObjectId(id),
+                latest: true
+            });
+
+            if(CheckLatestPodcast.length > 0)
+            {
+                return next(ApiError(400,'There is already One Latest Podcast'));   
+            }
         }
         
 
@@ -96,6 +140,7 @@ const UpdatePodcast=async(req,res,next)=>{
                     title,
                     description,
                     dateTime,
+                    latest,
                     videoLink
                 }       
             },
@@ -140,6 +185,8 @@ const RemovePodcast=async(req,res,next)=>{
         return next(ApiError(500, `Internal Server Error: ${error.message}`));
     }
 }
+
+
 
 module.exports={
     EnterPodcast,
