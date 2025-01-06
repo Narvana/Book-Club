@@ -24,6 +24,10 @@ const podcastSchema= new mongoose.Schema({
             },
             message: props => `${props.value} is not a valid URL!`
         }
+    },
+    latest:{
+        type:Boolean,
+        default:false
     }
 });
 
