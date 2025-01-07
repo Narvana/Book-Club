@@ -19,7 +19,7 @@ const podcastValidationRules = [
         .isISO8601()
         .withMessage('DateTime must be a valid date.'),
     body('videoLink')
-        .isURL()
+        .isString()
         .withMessage('Video link must be a valid URL.'),
     body('latest')
          .optional()
@@ -48,9 +48,9 @@ router.put('/Update',verify(['ADMIN']),
     .optional()
     .isString().withMessage('Video link must be a String for now.'),
     body('latest')
-         .optional()
-        .isBoolean()
-        .withMessage('latest must be either true or false.')
+    .optional()
+    .isBoolean()
+    .withMessage('latest must be either true or false.')
 ],UpdatePodcast);
 router.delete('/Remove',verify(['ADMIN']),RemovePodcast); 
 
