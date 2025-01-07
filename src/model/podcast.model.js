@@ -17,13 +17,13 @@ const podcastSchema= new mongoose.Schema({
     videoLink: {
         type: String,
         required: true,
-        validate: {
-            validator: function(v) {
-                const urlRegex = /^(https?:\/\/)?(www\.)?([a-zA-Z0-9]+(\.[a-zA-Z]{2,})+)(\/[^\s]*)?$/;
-                return urlRegex.test(v);
-            },
-            message: props => `${props.value} is not a valid URL!`
-        }
+        // validate: {
+        //     validator: function(v) {
+        //         const urlRegex = /^(https?:\/\/)?(www\.)?([a-zA-Z0-9]+(\.[a-zA-Z]{2,})+)(\/[^\s]*)?$/;
+        //         return urlRegex.test(v);
+        //     },
+        //     message: props => `${props.value} is not a valid URL!`
+        // }
     },
     latest:{
         type:Boolean,
