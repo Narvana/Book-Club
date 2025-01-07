@@ -46,7 +46,7 @@ router.put('/Update',verify(['ADMIN']),
     .isISO8601().withMessage('DateTime must be a valid date.'),
     body('videoLink')
     .optional()
-    .isURL().withMessage('Video link must be a valid URL.'),
+    .isString().withMessage('Video link must be a String for now.'),
     body('latest')
          .optional()
         .isBoolean()
