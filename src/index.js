@@ -32,8 +32,8 @@ app.use(helmet.hsts({
     includeSubDomains: true,
     preload: true,
 }));
-// app.use(helmet.frameguard({ action: 'sameorigin' }));
 
+// app.use(helmet.frameguard({ action: 'sameorigin' }));
 
 app.use(cors({
     origin: 
@@ -130,6 +130,10 @@ app.get('/test/database',(req,res)=>{
     }
 })
 
+const swaggerDocs = require('./swagger');
+// const { LEGAL_TLS_SOCKET_OPTIONS } = require('mongodb');
+swaggerDocs(app);
+
 const server = http.createServer(app);
 server.timeout = 60000;  // Set timeout to 1 minutes
 
@@ -140,3 +144,6 @@ server.listen(port, () => {
 // app.listen(port,()=>{
 //     console.log(`Secure Connection with port ${port}`)
 // })
+
+
+ 
