@@ -6,9 +6,9 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerDefinition = {
   openapi: '3.0.0', // Use OpenAPI 3.0
   info: {
-    title: 'StorageJini API Documentation',
+    title: 'Book Club API Documentation',
     version: '1.0.0',
-    description: 'API documentation for the StorageJini Web App',
+    description: 'API documentation for the Book Club Web App',
     contact: {
       name: 'MMR Solutions',
       url: 'http://mmrsolutions.co.in',
